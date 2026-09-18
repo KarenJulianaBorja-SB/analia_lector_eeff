@@ -96,7 +96,7 @@ export default function App() {
     );
   }
 
-  // --- PASO 2: FORMULARIO INTERMEDIO DE CARGA DE PARAMETROS Y PDF ---
+// --- PASO 2: FORMULARIO INTERMEDIO DE CARGA DE PARAMETROS Y PDF ---
   if (vista === "formulario") {
     return (
       <div className="min-h-screen bg-slate-100 flex flex-col font-sans">
@@ -140,16 +140,29 @@ export default function App() {
             </div>
 
             <div className="space-y-4 text-xs">
-              {/* Campo 1: Actividad Económica */}
+              {/* Campo 1: Actividad Económica (CIIU) con desplegable */}
               <div>
                 <label className="block font-medium text-slate-700 mb-1">Actividad Económica (CIIU)</label>
                 <input 
+                  list="opciones-ciuu"
                   type="text" 
                   value={ciuu}
                   onChange={(e) => setCiuu(e.target.value)}
-                  placeholder="Escribe código (ej. A0111)"
-                  className="w-full px-3 py-2 border border-slate-300 rounded-xl focus:ring-2 focus:ring-[#008B45] focus:outline-none"
+                  placeholder="Selecciona o escribe un código CIIU..."
+                  className="w-full px-3 py-2 border border-[#008B45] rounded-xl focus:ring-2 focus:ring-[#008B45] focus:outline-none bg-white font-medium text-slate-800"
                 />
+                <datalist id="opciones-ciuu">
+                  <option value="A0111 - Cultivo de cereales (excepto arroz), legumbres y semillas oleaginosas" />
+                  <option value="A0112 - Cultivo de arroz" />
+                  <option value="A0113 - Cultivo de hortalizas, raíces y tubérculos" />
+                  <option value="B0810 - Extracción de piedra, arena, arcillas comunes" />
+                  <option value="C1081 - Elaboración de azúcar" />
+                  <option value="C1090 - Elaboración de alimentos preparados para animales" />
+                  <option value="F4111 - Construcción de edificios residenciales" />
+                  <option value="G4690 - Comercio al por mayor no especializado" />
+                  <option value="K6412 - Bancos comerciales" />
+                  <option value="K6511 - Seguros generales" />
+                </datalist>
               </div>
 
               {/* Campo 2: Póliza Grandes Beneficiarios */}
@@ -179,7 +192,7 @@ export default function App() {
                 </select>
               </div>
 
-              {/* Dropzone de Carga de PDF */}
+              {/* Area de Carga de PDF */}
               <div 
                 onClick={() => setArchivoCargado(true)}
                 className={`border-2 border-dashed rounded-2xl p-6 text-center cursor-pointer transition ${archivoCargado ? "border-emerald-500 bg-emerald-50/50" : "border-slate-300 hover:border-[#008B45] bg-slate-50"}`}
@@ -211,7 +224,6 @@ export default function App() {
       </div>
     );
   }
-
   // --- PASO 3: TABLA CONTABLE COMPARATIVA (EXTRACCIÓN) ---
   return (
     <div className="min-h-screen bg-slate-50 text-slate-800 flex flex-col font-sans">
