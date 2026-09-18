@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { 
   FileSpreadsheet, Download, AlertTriangle, 
-  FileText, Calculator, ShieldCheck, ArrowLeft 
+  FileText, ShieldCheck, ArrowLeft, UploadCloud, CheckCircle2 
 } from "lucide-react";
 
 const DATOS_INICIALES = [
@@ -28,7 +28,12 @@ const DATOS_INICIALES = [
 ];
 
 export default function App() {
-  const [vista, setVista] = useState("inicio");
+  const [vista, setVista] = useState("inicio"); // 'inicio' | 'formulario' | 'tabla'
+  const [ciuu, setCiuu] = useState("A0111");
+  const [poliza, setPoliza] = useState("Si");
+  const [clasificacion, setClasificacion] = useState("Enfoque");
+  const [archivoCargado, setArchivoCargado] = useState(false);
+
   const [datos, setDatos] = useState(DATOS_INICIALES);
   const [mostrarModal, setMostrarModal] = useState(false);
   const [cuposCalculados, setCuposCalculados] = useState(false);
@@ -49,10 +54,10 @@ export default function App() {
 
   const formatCOP = (val) => new Intl.NumberFormat("es-CO", { style: "currency", currency: "COP", maximumFractionDigits: 0 }).format(val);
 
-  // --- VISTA 1: MENU DE SELECCION INICIAL ---
+  // --- PASO 1: MENÚ DE SELECCIÓN INICIAL ---
   if (vista === "inicio") {
     return (
-      <div className="min-h-screen bg-slate-950 flex items-center justify-center p-4">
+      <div className="min-h-screen bg-slate-950 flex items-center justify-center p-4 font-sans">
         <div className="bg-white rounded-3xl p-8 max-w-md w-full text-center shadow-2xl border border-slate-200">
           <div className="w-16 h-16 bg-[#008B45] text-white rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg shadow-emerald-900/30">
             <ShieldCheck className="w-10 h-10" />
@@ -76,7 +81,7 @@ export default function App() {
             </button>
 
             <button 
-              onClick={() => setVista("lector")}
+              onClick={() => setVista("formulario")}
               className="p-3 rounded-2xl bg-[#008B45] hover:bg-[#007037] text-white text-xs font-bold transition transform hover:scale-105 shadow-md shadow-emerald-800/30 h-20 flex items-center justify-center leading-tight"
             >
               Lector de EEFF
@@ -91,16 +96,132 @@ export default function App() {
     );
   }
 
-  // --- VISTA 2: LECTOR DE EEFF ---
+  // --- PASO 2: FORMULARIO INTERMEDIO DE CARGA DE PARAMETROS Y PDF ---
+  if (vista === "formulario") {
+    return (
+      <div className="min-h-screen bg-slate-100 flex flex-col font-sans">
+        {/* Header */}
+        <header className="bg-white border-b border-slate-200 px-6 py-3 flex items-center justify-between shadow-sm">
+          <div className="flex items-center space-x-3">
+            <button 
+              onClick={() => setVista("inicio")}
+              className="p-1.5 rounded-lg text-slate-500 hover:bg-slate-100 transition"
+              title="Volver al menú inicial"
+            >
+              <ArrowLeft className="w-5 h-5" />
+            </button>
+            <div className="flex items-center space-x-2">
+              <div className="w-7 h-7 rounded-full bg-[#008B45] flex items-center justify-center text-white">
+                <ShieldCheck className="w-4 h-4" />
+              </div>
+              <span className="text-base font-bold text-slate-900">
+                Seguros Bolívar <span className="text-[#008B45]">| ANALIA</span>
+              </span>
+            </div>
+          </div>
+          <div className="text-xs text-slate-500">
+            Usuario: <span className="font-semibold text-slate-700">karen.juliana.borja@segurosbolivar.com</span>
+          </div>
+        </header>
+
+        {/* Tarjeta del Formulario Intermedio */}
+        <main className="flex-1 flex items-center justify-center p-6">
+          <div className="bg-white rounded-3xl p-8 max-w-lg w-full shadow-xl border border-slate-200">
+            <div className="text-center mb-6">
+              <span className="text-[11px] uppercase tracking-widest text-slate-400 font-bold block">
+                SEGUROS BOLÍVAR
+              </span>
+              <h2 className="text-2xl font-bold text-[#008B45] mt-1">
+                Lector de Estados Financieros
+              </h2>
+              <p className="text-xs text-slate-500 mt-1">
+                Por favor selecciona el estado financiero que desea analizar.
+              </p>
+            </div>
+
+            <div className="space-y-4 text-xs">
+              {/* Campo 1: Actividad Económica */}
+              <div>
+                <label className="block font-medium text-slate-700 mb-1">Actividad Económica (CIIU)</label>
+                <input 
+                  type="text" 
+                  value={ciuu}
+                  onChange={(e) => setCiuu(e.target.value)}
+                  placeholder="Escribe código (ej. A0111)"
+                  className="w-full px-3 py-2 border border-slate-300 rounded-xl focus:ring-2 focus:ring-[#008B45] focus:outline-none"
+                />
+              </div>
+
+              {/* Campo 2: Póliza Grandes Beneficiarios */}
+              <div>
+                <label className="block font-medium text-slate-700 mb-1">Póliza Grandes Beneficiarios Davivienda</label>
+                <select 
+                  value={poliza}
+                  onChange={(e) => setPoliza(e.target.value)}
+                  className="w-full px-3 py-2 border border-slate-300 rounded-xl focus:ring-2 focus:ring-[#008B45] focus:outline-none bg-white"
+                >
+                  <option value="Si">Si</option>
+                  <option value="No">No</option>
+                </select>
+              </div>
+
+              {/* Campo 3: Clasificación del cliente */}
+              <div>
+                <label className="block font-medium text-slate-700 mb-1">Clasificación del cliente</label>
+                <select 
+                  value={clasificacion}
+                  onChange={(e) => setClasificacion(e.target.value)}
+                  className="w-full px-3 py-2 border border-slate-300 rounded-xl focus:ring-2 focus:ring-[#008B45] focus:outline-none bg-white"
+                >
+                  <option value="Enfoque">Enfoque</option>
+                  <option value="Corporativo">Corporativo</option>
+                  <option value="Pyme">Pyme</option>
+                </select>
+              </div>
+
+              {/* Dropzone de Carga de PDF */}
+              <div 
+                onClick={() => setArchivoCargado(true)}
+                className={`border-2 border-dashed rounded-2xl p-6 text-center cursor-pointer transition ${archivoCargado ? "border-emerald-500 bg-emerald-50/50" : "border-slate-300 hover:border-[#008B45] bg-slate-50"}`}
+              >
+                {archivoCargado ? (
+                  <div className="flex flex-col items-center text-emerald-700">
+                    <CheckCircle2 className="w-10 h-10 mb-2 text-[#008B45]" />
+                    <span className="font-semibold text-xs">EEFF_2025_Davivienda.pdf listo</span>
+                    <span className="text-[10px] text-emerald-600 mt-1">Haz clic para reemplazar archivo</span>
+                  </div>
+                ) : (
+                  <div className="flex flex-col items-center text-slate-500">
+                    <UploadCloud className="w-10 h-10 mb-2 text-[#008B45]" />
+                    <span className="font-semibold text-xs">Selecciona o arrastra uno o varios archivos</span>
+                  </div>
+                )}
+              </div>
+
+              {/* Botón de Procesar */}
+              <button 
+                onClick={() => setVista("tabla")}
+                className="w-full mt-4 py-3 bg-[#008B45] hover:bg-[#007037] text-white font-bold text-xs rounded-xl shadow-md transition transform hover:scale-[1.01]"
+              >
+                Procesar Estado Financiero
+              </button>
+            </div>
+          </div>
+        </main>
+      </div>
+    );
+  }
+
+  // --- PASO 3: TABLA CONTABLE COMPARATIVA (EXTRACCIÓN) ---
   return (
     <div className="min-h-screen bg-slate-50 text-slate-800 flex flex-col font-sans">
       {/* Header Corporativo */}
       <header className="bg-white border-b border-slate-200 px-6 py-3 flex items-center justify-between shadow-sm">
         <div className="flex items-center space-x-3">
           <button 
-            onClick={() => setVista("inicio")}
+            onClick={() => setVista("formulario")}
             className="p-1.5 rounded-lg text-slate-500 hover:bg-slate-100 transition"
-            title="Volver al menú inicial"
+            title="Volver a la selección de documento"
           >
             <ArrowLeft className="w-5 h-5" />
           </button>
@@ -114,14 +235,14 @@ export default function App() {
           </div>
         </div>
         <div className="text-xs text-slate-500">
-          Usuario: <span className="font-semibold text-slate-700">karen.juliana.borja@segurosbolivar.com</span>
+          Actividad: <span className="font-semibold text-slate-700">{ciuu}</span> | Póliza: <span className="font-semibold text-slate-700">{poliza}</span>
         </div>
       </header>
 
       {/* Contenido en Grilla */}
       <main className="flex-1 max-w-7xl w-full mx-auto p-6 grid grid-cols-12 gap-6">
         
-        {/* Tabla Contable (8 columnas) */}
+        {/* Tabla Contable */}
         <section className="col-span-8 bg-white rounded-2xl border border-slate-200 p-5 shadow-sm flex flex-col justify-between">
           <div>
             <div className="flex justify-between items-center mb-4">
@@ -178,12 +299,12 @@ export default function App() {
           </div>
         </section>
 
-        {/* Lateral: Visor PDF y Panel (4 columnas) */}
+        {/* Panel Lateral */}
         <section className="col-span-4 flex flex-col space-y-6">
           <div className="bg-white rounded-2xl border-2 border-dashed border-slate-200 p-6 flex flex-col items-center justify-center text-center flex-1">
             <FileText className="w-10 h-10 text-[#008B45] mb-2" />
-            <span className="text-xs font-bold text-slate-700">Arrastra el estado financiero en PDF aquí</span>
-            <span className="text-[11px] text-slate-400 mt-1">o haz clic para seleccionar un archivo</span>
+            <span className="text-xs font-bold text-slate-700">Documento cargado</span>
+            <span className="text-[11px] text-slate-400 mt-1">EEFF_2025_Davivienda.pdf</span>
           </div>
 
           <div className="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm">
