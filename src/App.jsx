@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { 
   FileSpreadsheet, Download, AlertTriangle, 
-  FileText, ShieldCheck, ArrowLeft, UploadCloud, CheckCircle2 
+  FileText, ShieldCheck, ArrowLeft, UploadCloud, CheckCircle2, Save, Calculator 
 } from "lucide-react";
 
 const DATOS_INICIALES = [
@@ -15,9 +15,9 @@ const DATOS_INICIALES = [
   { id: 8, cuenta: "total pasivo", y2025: 1383000, y2024: 644140, esTotal: true },
   { id: 9, cuenta: "total patrimonio", y2025: 7275837, y2024: 5155860, esTotal: true },
   { id: 10, cuenta: "reservas", y2025: 0, y2024: 0, esTotal: false },
-  { id: 11, cuenta: "ingresos operacionales", y2025: 0, y2024: 0, esTotal: false },
-  { id: 12, cuenta: "costos ventas", y2025: 0, y2024: 0, esTotal: false },
-  { id: 13, cuenta: "utilidad operacional", y2025: 0, y2024: 0, esTotal: false },
+  { id: 11, cuenta: "ingresos operacionales", y2025: 5000000, y2024: 4000000, esTotal: false },
+  { id: 12, cuenta: "costos ventas", y2025: 2000000, y2024: 1500000, esTotal: false },
+  { id: 13, cuenta: "utilidad operacional", y2025: 3000000, y2024: 2500000, esTotal: true },
   { id: 14, cuenta: "gastos financieros", y2025: 0, y2024: 0, esTotal: false },
   { id: 15, cuenta: "depreciacion", y2025: 0, y2024: 0, esTotal: false },
   { id: 16, cuenta: "amortizacion", y2025: 0, y2024: 0, esTotal: false },
@@ -28,7 +28,7 @@ const DATOS_INICIALES = [
 ];
 
 export default function App() {
-  const [vista, setVista] = useState("inicio"); // 'inicio' | 'formulario' | 'tabla'
+  const [vista, setVista] = useState("inicio");
   const [ciuu, setCiuu] = useState("B0810 - Extracción de piedra, arena, arcillas comunes");
   const [poliza, setPoliza] = useState("No");
   const [clasificacion, setClasificacion] = useState("Enfoque");
@@ -36,9 +36,9 @@ export default function App() {
 
   const [datos, setDatos] = useState(DATOS_INICIALES);
   const [mostrarModal, setMostrarModal] = useState(false);
+  const [mostrarModalExito, setMostrarModalExito] = useState(false);
   const [cuposCalculados, setCuposCalculados] = useState(false);
 
-  // Manejar selección real de archivo PDF
   const handleFileSelect = (event) => {
     const file = event.target.files[0];
     if (file) {
@@ -48,21 +48,34 @@ export default function App() {
 
   const handleCellChange = (id, year, value) => {
     const numVal = parseInt(value.replace(/[^0-9]/g, ""), 10) || 0;
-    setDatos(prev => prev.map(row => row.id === id ? { ...row, [year]: numVal } : row));
+    
+    setDatos(prev => {
+      const nuevosDatos = prev.map(row => row.id === id ? { ...row, [year]: numVal } : row);
+      const ingresosRow = nuevosDatos.find(r => r.id === 11);
+      const costosRow = nuevosDatos.find(r => r.id === 12);
+      
+      if (ingresosRow && costosRow) {
+        const utilOp = (ingresosRow[year] || 0) - (costosRow[year] || 0);
+        return nuevosDatos.map(r => r.id === 13 ? { ...r, [year]: utilOp } : r);
+      }
+      return nuevosDatos;
+    });
   };
 
-  const solicitarCalculo = () => {
+  const validarAccion = (accion) => {
     const tieneCeros = datos.some(r => r.y2025 === 0 || r.y2024 === 0);
     if (tieneCeros) {
       setMostrarModal(true);
     } else {
       setCuposCalculados(true);
+      if (accion === "guardar") {
+        setMostrarModalExito(true);
+      }
     }
   };
 
   const formatCOP = (val) => new Intl.NumberFormat("es-CO", { style: "currency", currency: "COP", maximumFractionDigits: 0 }).format(val);
 
-  // --- PASO 1: MENÚ DE SELECCIÓN INICIAL ---
   if (vista === "inicio") {
     return (
       <div className="min-h-screen bg-slate-950 flex items-center justify-center p-4 font-sans">
@@ -70,15 +83,10 @@ export default function App() {
           <div className="w-16 h-16 bg-[#008B45] text-white rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg shadow-emerald-900/30">
             <ShieldCheck className="w-10 h-10" />
           </div>
-
           <span className="text-[11px] uppercase tracking-widest text-slate-400 font-bold block">
             SEGUROS BOLÍVAR
           </span>
-
-          <h1 className="text-3xl font-black text-[#008B45] mt-1 tracking-tight">
-            ANALIA
-          </h1>
-
+          <h1 className="text-3xl font-black text-[#008B45] mt-1 tracking-tight">ANALIA</h1>
           <p className="text-xs text-slate-500 mt-2 mb-8 font-medium">
             Por favor seleccione el servicio que desea utilizar
           </p>
@@ -87,14 +95,12 @@ export default function App() {
             <button disabled className="p-3 rounded-2xl bg-slate-100 text-slate-400 text-xs font-semibold cursor-not-allowed h-20 flex items-center justify-center leading-tight">
               Lector de Contratos
             </button>
-
             <button 
               onClick={() => setVista("formulario")}
               className="p-3 rounded-2xl bg-[#008B45] hover:bg-[#007037] text-white text-xs font-bold transition transform hover:scale-105 shadow-md shadow-emerald-800/30 h-20 flex items-center justify-center leading-tight"
             >
               Lector de EEFF
             </button>
-
             <button disabled className="p-3 rounded-2xl bg-slate-100 text-slate-400 text-xs font-semibold cursor-not-allowed h-20 flex items-center justify-center leading-tight">
               Servicio Integrado
             </button>
@@ -104,7 +110,6 @@ export default function App() {
     );
   }
 
-  // --- PASO 2: FORMULARIO DE CARGA CON ARCHIVO REAL ---
   if (vista === "formulario") {
     return (
       <div className="min-h-screen bg-slate-100 flex flex-col font-sans">
@@ -134,19 +139,12 @@ export default function App() {
         <main className="flex-1 flex items-center justify-center p-6">
           <div className="bg-white rounded-3xl p-8 max-w-lg w-full shadow-xl border border-slate-200">
             <div className="text-center mb-6">
-              <span className="text-[11px] uppercase tracking-widest text-slate-400 font-bold block">
-                SEGUROS BOLÍVAR
-              </span>
-              <h2 className="text-2xl font-bold text-[#008B45] mt-1">
-                Lector de Estados Financieros
-              </h2>
-              <p className="text-xs text-slate-500 mt-1">
-                Por favor selecciona el estado financiero que desea analizar.
-              </p>
+              <span className="text-[11px] uppercase tracking-widest text-slate-400 font-bold block">SEGUROS BOLÍVAR</span>
+              <h2 className="text-2xl font-bold text-[#008B45] mt-1">Lector de Estados Financieros</h2>
+              <p className="text-xs text-slate-500 mt-1">Por favor selecciona el estado financiero que desea analizar.</p>
             </div>
 
             <div className="space-y-4 text-xs">
-              {/* Campo CIIU */}
               <div>
                 <label className="block font-medium text-slate-700 mb-1">Actividad Económica (CIIU)</label>
                 <input 
@@ -171,7 +169,6 @@ export default function App() {
                 </datalist>
               </div>
 
-              {/* Póliza */}
               <div>
                 <label className="block font-medium text-slate-700 mb-1">Póliza Grandes Beneficiarios Davivienda</label>
                 <select 
@@ -184,7 +181,6 @@ export default function App() {
                 </select>
               </div>
 
-              {/* Clasificación */}
               <div>
                 <label className="block font-medium text-slate-700 mb-1">Clasificación del cliente</label>
                 <select 
@@ -198,19 +194,8 @@ export default function App() {
                 </select>
               </div>
 
-              {/* Selector de Archivo Real (Input File Oculto) */}
-              <label 
-                className={`border-2 border-dashed rounded-2xl p-6 text-center cursor-pointer transition flex flex-col items-center justify-center ${
-                  nombreArchivo ? "border-emerald-500 bg-emerald-50/50" : "border-slate-300 hover:border-[#008B45] bg-slate-50"
-                }`}
-              >
-                <input 
-                  type="file" 
-                  accept=".pdf"
-                  onChange={handleFileSelect}
-                  className="hidden" 
-                />
-                
+              <label className={`border-2 border-dashed rounded-2xl p-6 text-center cursor-pointer transition flex flex-col items-center justify-center ${nombreArchivo ? "border-emerald-500 bg-emerald-50/50" : "border-slate-300 hover:border-[#008B45] bg-slate-50"}`}>
+                <input type="file" accept=".pdf" onChange={handleFileSelect} className="hidden" />
                 {nombreArchivo ? (
                   <div className="flex flex-col items-center text-emerald-700">
                     <CheckCircle2 className="w-10 h-10 mb-2 text-[#008B45]" />
@@ -226,7 +211,6 @@ export default function App() {
                 )}
               </label>
 
-              {/* Botón de Procesar */}
               <button 
                 onClick={() => setVista("tabla")}
                 className="w-full mt-4 py-3 bg-[#008B45] hover:bg-[#007037] text-white font-bold text-xs rounded-xl shadow-md transition transform hover:scale-[1.01]"
@@ -240,7 +224,6 @@ export default function App() {
     );
   }
 
-  // --- PASO 3: TABLA CONTABLE COMPARATIVA ---
   return (
     <div className="min-h-screen bg-slate-50 text-slate-800 flex flex-col font-sans">
       <header className="bg-white border-b border-slate-200 px-6 py-3 flex items-center justify-between shadow-sm">
@@ -261,8 +244,13 @@ export default function App() {
             </span>
           </div>
         </div>
-        <div className="text-xs text-slate-500">
-          Actividad: <span className="font-semibold text-slate-700">{ciuu}</span> | Póliza: <span className="font-semibold text-slate-700">{poliza}</span>
+        <div className="flex items-center space-x-4 text-xs">
+          <span className="bg-emerald-50 text-emerald-700 border border-emerald-200 px-2.5 py-1 rounded-full font-semibold">
+            Confianza OCR: 98.5%
+          </span>
+          <div className="text-slate-500">
+            Actividad: <span className="font-semibold text-slate-700">{ciuu.split('-')[0]}</span> | Póliza: <span className="font-semibold text-slate-700">{poliza}</span>
+          </div>
         </div>
       </header>
 
@@ -323,11 +311,12 @@ export default function App() {
           </div>
         </section>
 
+        {/* Panel Lateral con los dos botones integrados */}
         <section className="col-span-4 flex flex-col space-y-6">
           <div className="bg-white rounded-2xl border-2 border-dashed border-slate-200 p-6 flex flex-col items-center justify-center text-center flex-1">
             <FileText className="w-10 h-10 text-[#008B45] mb-2" />
             <span className="text-xs font-bold text-slate-700">Documento cargado</span>
-            <span className="text-[11px] text-slate-400 mt-1">{nombreArchivo || "Documento_Sin_Nombre.pdf"}</span>
+            <span className="text-[11px] text-slate-400 mt-1">{nombreArchivo || "EEFF_2025_Davivienda.pdf"}</span>
           </div>
 
           <div className="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm">
@@ -336,12 +325,24 @@ export default function App() {
               <span className="text-[10px] uppercase tracking-wider font-bold text-emerald-800 block">CUPO TOTAL</span>
               <span className="text-xl font-black text-[#008B45]">{cuposCalculados ? "$ 1.500.000.000" : "$0"}</span>
             </div>
-            <button 
-              onClick={solicitarCalculo}
-              className="w-full py-2.5 bg-[#008B45] hover:bg-[#007037] text-white font-bold text-xs rounded-xl shadow-sm transition"
-            >
-              Calcular Cupo
-            </button>
+
+            <div className="space-y-2">
+              <button 
+                onClick={() => validarAccion("calcular")}
+                className="w-full py-2.5 bg-white border-2 border-[#008B45] text-[#008B45] hover:bg-emerald-50 font-bold text-xs rounded-xl shadow-sm transition flex items-center justify-center space-x-2"
+              >
+                <Calculator className="w-4 h-4" />
+                <span>Calcular Cupo</span>
+              </button>
+
+              <button 
+                onClick={() => validarAccion("guardar")}
+                className="w-full py-2.5 bg-[#008B45] hover:bg-[#007037] text-white font-bold text-xs rounded-xl shadow-md transition transform hover:scale-[1.01] flex items-center justify-center space-x-2"
+              >
+                <Save className="w-4 h-4" />
+                <span>Guardar Final</span>
+              </button>
+            </div>
           </div>
         </section>
       </main>
@@ -356,12 +357,27 @@ export default function App() {
             <p className="text-xs text-slate-600 mb-6">Hay campos financieros con valor <strong>$0</strong> en la tabla contable.</p>
             <div className="flex space-x-2">
               <button onClick={() => setMostrarModal(false)} className="flex-1 py-2 text-xs font-semibold text-slate-600 bg-slate-100 hover:bg-slate-200 rounded-lg">
-                Cancelar
+                Cancelar y Editar
               </button>
-              <button onClick={() => { setMostrarModal(false); setCuposCalculados(true); }} className="flex-1 py-2 text-xs font-semibold text-white bg-[#008B45] hover:bg-[#007037] rounded-lg shadow-sm">
-                Continuar
+              <button onClick={() => { setMostrarModal(false); setCuposCalculados(true); setMostrarModalExito(true); }} className="flex-1 py-2 text-xs font-semibold text-white bg-[#008B45] hover:bg-[#007037] rounded-lg shadow-sm">
+                Continuar y Guardar
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {mostrarModalExito && (
+        <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl p-6 max-w-sm w-full shadow-2xl border border-slate-100 text-center">
+            <div className="w-12 h-12 rounded-full bg-emerald-50 text-[#008B45] flex items-center justify-center mb-3 mx-auto">
+              <CheckCircle2 className="w-6 h-6" />
+            </div>
+            <h3 className="text-base font-bold text-slate-900 mb-1">¡Registro Guardado!</h3>
+            <p className="text-xs text-slate-600 mb-6">El análisis financiero y el cupo calculado de <strong>$1.500.000.000</strong> han sido guardados exitosamente en Seguros Bolívar.</p>
+            <button onClick={() => setMostrarModalExito(false)} className="w-full py-2 text-xs font-semibold text-white bg-[#008B45] hover:bg-[#007037] rounded-lg shadow-sm">
+              Entendido
+            </button>
           </div>
         </div>
       )}
