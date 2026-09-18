@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { 
-  FileSpreadsheet, Download, AlertTriangle, CheckCircle, 
-  FileText, ArrowRight, RefreshCw, Calculator, ShieldCheck, ArrowLeft 
+  FileSpreadsheet, Download, AlertTriangle, 
+  FileText, Calculator, ShieldCheck, ArrowLeft 
 } from "lucide-react";
 
 const DATOS_INICIALES = [
@@ -28,7 +28,7 @@ const DATOS_INICIALES = [
 ];
 
 export default function App() {
-  const [vista, setVista] = useState("inicio"); // 'inicio' | 'lector'
+  const [vista, setVista] = useState("inicio");
   const [datos, setDatos] = useState(DATOS_INICIALES);
   const [mostrarModal, setMostrarModal] = useState(false);
   const [cuposCalculados, setCuposCalculados] = useState(false);
@@ -47,52 +47,42 @@ export default function App() {
     }
   };
 
-  const confirmarModal = () => {
-    setMostrarModal(false);
-    setCuposCalculados(true);
-  };
-
   const formatCOP = (val) => new Intl.NumberFormat("es-CO", { style: "currency", currency: "COP", maximumFractionDigits: 0 }).format(val);
 
   // --- VISTA 1: MENU DE SELECCION INICIAL ---
   if (vista === "inicio") {
     return (
-      <div className="min-h-screen relative flex items-center justify-center bg-slate-900 overflow-hidden font-sans">
-        {/* Fondo decorativo con temática AI / Seguros Bolívar */}
-        <div className="absolute inset-0 bg-gradient-to-br from-slate-950 via-slate-900 to-[#003b1d] opacity-90" />
-        
-        {/* Tarjeta Modal del Menú */}
-        <div className="relative z-10 bg-white/95 backdrop-blur-md p-8 rounded-3xl shadow-2xl max-w-lg w-full text-center border border-white/20">
-          <div className="flex flex-col items-center mb-6">
-            {/* Escudo / Logo */}
-            <div className="w-16 h-16 bg-[#008B45] text-white rounded-full flex items-center justify-center mb-3 shadow-lg shadow-emerald-900/30">
-              <ShieldCheck className="w-10 h-10" />
-            </div>
-            <span className="text-xs uppercase tracking-widest text-slate-500 font-bold">SEGUROS BOLÍVAR</span>
-            <h1 className="text-3xl font-black tracking-tight text-[#008B45] mt-1">ANALIA</h1>
-            <p className="text-xs text-slate-500 mt-2 font-medium">Por favor seleccione el servicio que desea utilizar</p>
+      <div className="min-h-screen bg-slate-950 flex items-center justify-center p-4">
+        <div className="bg-white rounded-3xl p-8 max-w-md w-full text-center shadow-2xl border border-slate-200">
+          <div className="w-16 h-16 bg-[#008B45] text-white rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg shadow-emerald-900/30">
+            <ShieldCheck className="w-10 h-10" />
           </div>
 
-          {/* Botones de Selección */}
-          <div className="grid grid-cols-3 gap-3 mt-8">
-            <button 
-              disabled 
-              className="p-3 rounded-2xl bg-emerald-900/40 text-emerald-200 text-xs font-semibold opacity-60 cursor-not-allowed flex flex-col items-center justify-center h-20 text-center leading-tight"
-            >
+          <span className="text-[11px] uppercase tracking-widest text-slate-400 font-bold block">
+            SEGUROS BOLÍVAR
+          </span>
+
+          <h1 className="text-3xl font-black text-[#008B45] mt-1 tracking-tight">
+            ANALIA
+          </h1>
+
+          <p className="text-xs text-slate-500 mt-2 mb-8 font-medium">
+            Por favor seleccione el servicio que desea utilizar
+          </p>
+
+          <div className="grid grid-cols-3 gap-3">
+            <button disabled className="p-3 rounded-2xl bg-slate-100 text-slate-400 text-xs font-semibold cursor-not-allowed h-20 flex items-center justify-center leading-tight">
               Lector de Contratos
             </button>
 
             <button 
               onClick={() => setVista("lector")}
-              className="p-3 rounded-2xl bg-[#008B45] hover:bg-[#007037] text-white text-xs font-bold transition transform hover:scale-105 shadow-lg shadow-emerald-800/40 flex flex-col items-center justify-center h-20 text-center leading-tight ring-4 ring-emerald-500/20"
+              className="p-3 rounded-2xl bg-[#008B45] hover:bg-[#007037] text-white text-xs font-bold transition transform hover:scale-105 shadow-md shadow-emerald-800/30 h-20 flex items-center justify-center leading-tight"
             >
               Lector de EEFF
             </button>
 
-            <button 
-              disabled 
-              className="p-3 rounded-2xl bg-emerald-900/40 text-emerald-200 text-xs font-semibold opacity-60 cursor-not-allowed flex flex-col items-center justify-center h-20 text-center leading-tight"
-            >
+            <button disabled className="p-3 rounded-2xl bg-slate-100 text-slate-400 text-xs font-semibold cursor-not-allowed h-20 flex items-center justify-center leading-tight">
               Servicio Integrado
             </button>
           </div>
@@ -101,131 +91,113 @@ export default function App() {
     );
   }
 
-  // --- VISTA 2: LECTOR DE ESTADOS FINANCIEROS (TABLA + PANEL) ---
+  // --- VISTA 2: LECTOR DE EEFF ---
   return (
-    <div className="min-h-screen flex flex-col bg-slate-100 text-slate-800">
+    <div className="min-h-screen bg-slate-50 text-slate-800 flex flex-col font-sans">
       {/* Header Corporativo */}
       <header className="bg-white border-b border-slate-200 px-6 py-3 flex items-center justify-between shadow-sm">
-        <div className="flex items-center space-x-4">
+        <div className="flex items-center space-x-3">
           <button 
             onClick={() => setVista("inicio")}
-            className="p-1.5 rounded-lg text-slate-500 hover:bg-slate-100 hover:text-slate-800 transition"
+            className="p-1.5 rounded-lg text-slate-500 hover:bg-slate-100 transition"
             title="Volver al menú inicial"
           >
             <ArrowLeft className="w-5 h-5" />
           </button>
-          <div className="flex items-center space-x-3">
-            <div className="w-8 h-8 rounded-full bg-[#008B45] flex items-center justify-center text-white font-bold">
-              <ShieldCheck className="w-5 h-5" />
+          <div className="flex items-center space-x-2">
+            <div className="w-7 h-7 rounded-full bg-[#008B45] flex items-center justify-center text-white">
+              <ShieldCheck className="w-4 h-4" />
             </div>
-            <span className="text-xl font-bold tracking-tight text-slate-900">
-              Seguros Bolívar <span className="text-[#008B45] font-semibold">| ANALIA</span>
+            <span className="text-base font-bold text-slate-900">
+              Seguros Bolívar <span className="text-[#008B45]">| ANALIA</span>
             </span>
           </div>
         </div>
         <div className="text-xs text-slate-500">
-          Usuario: <span className="font-medium text-slate-700">karen.juliana.borja@segurosbolivar.com</span>
+          Usuario: <span className="font-semibold text-slate-700">karen.juliana.borja@segurosbolivar.com</span>
         </div>
       </header>
 
-      {/* Contenido Principal */}
-      <main className="flex-1 p-6 max-w-7xl mx-auto w-full grid grid-cols-12 gap-6">
+      {/* Contenido en Grilla */}
+      <main className="flex-1 max-w-7xl w-full mx-auto p-6 grid grid-cols-12 gap-6">
         
-        {/* Tabla Contable */}
-        <section className="col-span-8 bg-white rounded-xl shadow-sm border border-slate-200 p-5 flex flex-col">
-          <div className="flex justify-between items-center mb-4">
-            <div>
-              <h2 className="text-lg font-bold text-slate-900">Tabla contable comparativa</h2>
-              <p className="text-xs text-slate-500">Haz clic en cualquier valor para editarlo. Los campos sin dato se muestran como 0.</p>
+        {/* Tabla Contable (8 columnas) */}
+        <section className="col-span-8 bg-white rounded-2xl border border-slate-200 p-5 shadow-sm flex flex-col justify-between">
+          <div>
+            <div className="flex justify-between items-center mb-4">
+              <div>
+                <h2 className="text-base font-bold text-slate-900">Tabla contable comparativa</h2>
+                <p className="text-xs text-slate-500">Haz clic en cualquier valor para editarlo. Los campos sin dato se muestran como 0.</p>
+              </div>
+              <div className="flex space-x-2">
+                <button className="flex items-center space-x-1.5 px-3 py-1.5 text-xs font-medium text-slate-600 bg-slate-100 hover:bg-slate-200 rounded-lg">
+                  <FileSpreadsheet className="w-4 h-4 text-emerald-600" />
+                  <span>Exportar Excel</span>
+                </button>
+                <button className="flex items-center space-x-1.5 px-3 py-1.5 text-xs font-medium text-slate-600 bg-slate-100 hover:bg-slate-200 rounded-lg">
+                  <Download className="w-4 h-4 text-slate-600" />
+                  <span>Descargar PDF</span>
+                </button>
+              </div>
             </div>
-            <div className="flex space-x-2">
-              <button className="flex items-center space-x-1.5 px-3 py-1.5 text-xs font-medium text-slate-600 bg-slate-100 hover:bg-slate-200 rounded-lg">
-                <FileSpreadsheet className="w-4 h-4 text-emerald-600" />
-                <span>Exportar Excel</span>
-              </button>
-              <button className="flex items-center space-x-1.5 px-3 py-1.5 text-xs font-medium text-slate-600 bg-slate-100 hover:bg-slate-200 rounded-lg">
-                <Download className="w-4 h-4 text-slate-600" />
-                <span>Descargar PDF</span>
-              </button>
-            </div>
-          </div>
 
-          <div className="overflow-x-auto border rounded-lg border-slate-200 flex-1">
-            <table className="w-full text-left text-xs">
-              <thead className="bg-slate-50 border-b border-slate-200 text-slate-600 uppercase tracking-wider text-[11px]">
-                <tr>
-                  <th className="py-2.5 px-4 font-semibold">CUENTA</th>
-                  <th className="py-2.5 px-4 font-semibold text-right">2025</th>
-                  <th className="py-2.5 px-4 font-semibold text-right">2024</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-100">
-                {datos.map((row) => (
-                  <tr key={row.id} className={row.esTotal ? "bg-emerald-50/70 font-bold text-[#008B45]" : "hover:bg-slate-50"}>
-                    <td className="py-2 px-4 capitalize">{row.cuenta}</td>
-                    <td className="py-1.5 px-4 text-right">
-                      <input 
-                        type="text" 
-                        value={formatCOP(row.y2025)} 
-                        onChange={(e) => handleCellChange(row.id, "y2025", e.target.value)}
-                        className={`w-32 text-right px-2 py-1 rounded border ${row.esTotal ? "bg-white font-bold border-emerald-300 text-[#008B45]" : "border-slate-200"} focus:ring-1 focus:ring-[#008B45]`}
-                      />
-                    </td>
-                    <td className="py-1.5 px-4 text-right">
-                      <input 
-                        type="text" 
-                        value={formatCOP(row.y2024)} 
-                        onChange={(e) => handleCellChange(row.id, "y2024", e.target.value)}
-                        className={`w-32 text-right px-2 py-1 rounded border ${row.esTotal ? "bg-white font-bold border-emerald-300 text-[#008B45]" : "border-slate-200"} focus:ring-1 focus:ring-[#008B45]`}
-                      />
-                    </td>
+            <div className="overflow-x-auto border border-slate-200 rounded-xl">
+              <table className="w-full text-left text-xs">
+                <thead className="bg-slate-50 border-b border-slate-200 text-slate-600 uppercase tracking-wider text-[11px]">
+                  <tr>
+                    <th className="py-2.5 px-4 font-semibold">CUENTA</th>
+                    <th className="py-2.5 px-4 font-semibold text-right">2025</th>
+                    <th className="py-2.5 px-4 font-semibold text-right">2024</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody className="divide-y divide-slate-100">
+                  {datos.map((row) => (
+                    <tr key={row.id} className={row.esTotal ? "bg-emerald-50/70 font-bold text-[#008B45]" : "hover:bg-slate-50"}>
+                      <td className="py-2 px-4 capitalize">{row.cuenta}</td>
+                      <td className="py-1.5 px-4 text-right">
+                        <input 
+                          type="text" 
+                          value={formatCOP(row.y2025)} 
+                          onChange={(e) => handleCellChange(row.id, "y2025", e.target.value)}
+                          className={`w-32 text-right px-2 py-1 rounded border ${row.esTotal ? "bg-white font-bold border-emerald-300 text-[#008B45]" : "border-slate-200"} focus:ring-1 focus:ring-[#008B45]`}
+                        />
+                      </td>
+                      <td className="py-1.5 px-4 text-right">
+                        <input 
+                          type="text" 
+                          value={formatCOP(row.y2024)} 
+                          onChange={(e) => handleCellChange(row.id, "y2024", e.target.value)}
+                          className={`w-32 text-right px-2 py-1 rounded border ${row.esTotal ? "bg-white font-bold border-emerald-300 text-[#008B45]" : "border-slate-200"} focus:ring-1 focus:ring-[#008B45]`}
+                        />
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </div>
         </section>
 
-        {/* Panel Lateral: Visor PDF y Panel de Cupos */}
-        <section className="col-span-4 space-y-6 flex flex-col justify-between">
-          <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-4 flex flex-col items-center justify-center border-dashed border-slate-300 min-h-[300px] text-slate-400">
-            <div className="w-12 h-12 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center mb-3">
-              <FileText className="w-6 h-6" />
-            </div>
+        {/* Lateral: Visor PDF y Panel (4 columnas) */}
+        <section className="col-span-4 flex flex-col space-y-6">
+          <div className="bg-white rounded-2xl border-2 border-dashed border-slate-200 p-6 flex flex-col items-center justify-center text-center flex-1">
+            <FileText className="w-10 h-10 text-[#008B45] mb-2" />
             <span className="text-xs font-bold text-slate-700">Arrastra el estado financiero en PDF aquí</span>
             <span className="text-[11px] text-slate-400 mt-1">o haz clic para seleccionar un archivo</span>
           </div>
 
-          <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-5">
-            <div className="flex justify-between items-center mb-3">
-              <h3 className="text-sm font-bold text-slate-900">Panel de Cupos</h3>
-              <span className="text-[10px] bg-slate-100 text-slate-500 font-medium px-2 py-0.5 rounded">
-                {cuposCalculados ? "Calculado" : "Pendiente"}
-              </span>
+          <div className="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm">
+            <h3 className="text-sm font-bold text-slate-900 mb-3">Panel de Cupos</h3>
+            <div className="bg-emerald-50 border border-emerald-100 p-3 rounded-xl mb-4">
+              <span className="text-[10px] uppercase tracking-wider font-bold text-emerald-800 block">CUPO TOTAL</span>
+              <span className="text-xl font-black text-[#008B45]">{cuposCalculados ? "$ 1.500.000.000" : "$0"}</span>
             </div>
-            <div className="grid grid-cols-2 gap-3 text-xs mb-4">
-              <div className="p-3 bg-emerald-50 rounded-lg border border-emerald-100 col-span-2">
-                <span className="text-emerald-800 text-[10px] font-bold block uppercase">CUPO TOTAL</span>
-                <span className="text-lg font-black text-[#008B45]">{cuposCalculados ? "$ 1.500.000.000" : "$0"}</span>
-              </div>
-              <div className="p-2.5 bg-slate-50 rounded-lg border border-slate-100">
-                <span className="text-slate-400 block text-[10px] uppercase">MODELO</span>
-                <span className="font-semibold text-slate-700">{cuposCalculados ? "Standard A1" : "N/A"}</span>
-              </div>
-              <div className="p-2.5 bg-slate-50 rounded-lg border border-slate-100">
-                <span className="text-slate-400 block text-[10px] uppercase">TASA SUGERIDA</span>
-                <span className="font-semibold text-slate-700">{cuposCalculados ? "1.2% EA" : "N/A"}</span>
-              </div>
-            </div>
-
-            <div className="flex space-x-2">
-              <button 
-                onClick={solicitarCalculo}
-                className="flex-1 py-2 bg-[#008B45] hover:bg-[#007037] text-white font-medium text-xs rounded-lg shadow-sm transition"
-              >
-                Calcular Cupo
-              </button>
-            </div>
+            <button 
+              onClick={solicitarCalculo}
+              className="w-full py-2.5 bg-[#008B45] hover:bg-[#007037] text-white font-bold text-xs rounded-xl shadow-sm transition"
+            >
+              Calcular Cupo
+            </button>
           </div>
         </section>
       </main>
@@ -233,25 +205,17 @@ export default function App() {
       {/* Modal Advertencia */}
       {mostrarModal && (
         <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-2xl p-6 max-w-md w-full shadow-2xl border border-slate-100 text-center">
-            <div className="w-12 h-12 rounded-full bg-amber-50 text-amber-600 flex items-center justify-center mb-4 mx-auto">
+          <div className="bg-white rounded-2xl p-6 max-w-sm w-full shadow-2xl border border-slate-100 text-center">
+            <div className="w-12 h-12 rounded-full bg-amber-50 text-amber-600 flex items-center justify-center mb-3 mx-auto">
               <AlertTriangle className="w-6 h-6" />
             </div>
             <h3 className="text-base font-bold text-slate-900 mb-1">¿Deseas continuar?</h3>
-            <p className="text-xs text-slate-600 mb-6">
-              Hay campos financieros con valor <strong>$0</strong> en la tabla contable.
-            </p>
-            <div className="flex space-x-3">
-              <button 
-                onClick={() => setMostrarModal(false)}
-                className="flex-1 py-2 text-xs font-semibold text-slate-600 bg-slate-100 hover:bg-slate-200 rounded-lg"
-              >
-                Cancelar y Editar
+            <p className="text-xs text-slate-600 mb-6">Hay campos financieros con valor <strong>$0</strong> en la tabla contable.</p>
+            <div className="flex space-x-2">
+              <button onClick={() => setMostrarModal(false)} className="flex-1 py-2 text-xs font-semibold text-slate-600 bg-slate-100 hover:bg-slate-200 rounded-lg">
+                Cancelar
               </button>
-              <button 
-                onClick={confirmarModal}
-                className="flex-1 py-2 text-xs font-semibold text-white bg-[#008B45] hover:bg-[#007037] rounded-lg shadow-sm"
-              >
+              <button onClick={() => { setMostrarModal(false); setCuposCalculados(true); }} className="flex-1 py-2 text-xs font-semibold text-white bg-[#008B45] hover:bg-[#007037] rounded-lg shadow-sm">
                 Continuar
               </button>
             </div>
