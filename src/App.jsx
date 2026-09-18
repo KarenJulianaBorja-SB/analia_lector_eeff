@@ -29,14 +29,22 @@ const DATOS_INICIALES = [
 
 export default function App() {
   const [vista, setVista] = useState("inicio"); // 'inicio' | 'formulario' | 'tabla'
-  const [ciuu, setCiuu] = useState("A0111");
-  const [poliza, setPoliza] = useState("Si");
+  const [ciuu, setCiuu] = useState("B0810 - Extracción de piedra, arena, arcillas comunes");
+  const [poliza, setPoliza] = useState("No");
   const [clasificacion, setClasificacion] = useState("Enfoque");
-  const [archivoCargado, setArchivoCargado] = useState(false);
+  const [nombreArchivo, setNombreArchivo] = useState("");
 
   const [datos, setDatos] = useState(DATOS_INICIALES);
   const [mostrarModal, setMostrarModal] = useState(false);
   const [cuposCalculados, setCuposCalculados] = useState(false);
+
+  // Manejar selección real de archivo PDF
+  const handleFileSelect = (event) => {
+    const file = event.target.files[0];
+    if (file) {
+      setNombreArchivo(file.name);
+    }
+  };
 
   const handleCellChange = (id, year, value) => {
     const numVal = parseInt(value.replace(/[^0-9]/g, ""), 10) || 0;
@@ -96,11 +104,10 @@ export default function App() {
     );
   }
 
-// --- PASO 2: FORMULARIO INTERMEDIO DE CARGA DE PARAMETROS Y PDF ---
+  // --- PASO 2: FORMULARIO DE CARGA CON ARCHIVO REAL ---
   if (vista === "formulario") {
     return (
       <div className="min-h-screen bg-slate-100 flex flex-col font-sans">
-        {/* Header */}
         <header className="bg-white border-b border-slate-200 px-6 py-3 flex items-center justify-between shadow-sm">
           <div className="flex items-center space-x-3">
             <button 
@@ -124,7 +131,6 @@ export default function App() {
           </div>
         </header>
 
-        {/* Tarjeta del Formulario Intermedio */}
         <main className="flex-1 flex items-center justify-center p-6">
           <div className="bg-white rounded-3xl p-8 max-w-lg w-full shadow-xl border border-slate-200">
             <div className="text-center mb-6">
@@ -140,7 +146,7 @@ export default function App() {
             </div>
 
             <div className="space-y-4 text-xs">
-              {/* Campo 1: Actividad Económica (CIIU) con desplegable */}
+              {/* Campo CIIU */}
               <div>
                 <label className="block font-medium text-slate-700 mb-1">Actividad Económica (CIIU)</label>
                 <input 
@@ -165,7 +171,7 @@ export default function App() {
                 </datalist>
               </div>
 
-              {/* Campo 2: Póliza Grandes Beneficiarios */}
+              {/* Póliza */}
               <div>
                 <label className="block font-medium text-slate-700 mb-1">Póliza Grandes Beneficiarios Davivienda</label>
                 <select 
@@ -178,7 +184,7 @@ export default function App() {
                 </select>
               </div>
 
-              {/* Campo 3: Clasificación del cliente */}
+              {/* Clasificación */}
               <div>
                 <label className="block font-medium text-slate-700 mb-1">Clasificación del cliente</label>
                 <select 
@@ -192,24 +198,33 @@ export default function App() {
                 </select>
               </div>
 
-              {/* Area de Carga de PDF */}
-              <div 
-                onClick={() => setArchivoCargado(true)}
-                className={`border-2 border-dashed rounded-2xl p-6 text-center cursor-pointer transition ${archivoCargado ? "border-emerald-500 bg-emerald-50/50" : "border-slate-300 hover:border-[#008B45] bg-slate-50"}`}
+              {/* Selector de Archivo Real (Input File Oculto) */}
+              <label 
+                className={`border-2 border-dashed rounded-2xl p-6 text-center cursor-pointer transition flex flex-col items-center justify-center ${
+                  nombreArchivo ? "border-emerald-500 bg-emerald-50/50" : "border-slate-300 hover:border-[#008B45] bg-slate-50"
+                }`}
               >
-                {archivoCargado ? (
+                <input 
+                  type="file" 
+                  accept=".pdf"
+                  onChange={handleFileSelect}
+                  className="hidden" 
+                />
+                
+                {nombreArchivo ? (
                   <div className="flex flex-col items-center text-emerald-700">
                     <CheckCircle2 className="w-10 h-10 mb-2 text-[#008B45]" />
-                    <span className="font-semibold text-xs">EEFF_2025_Davivienda.pdf listo</span>
-                    <span className="text-[10px] text-emerald-600 mt-1">Haz clic para reemplazar archivo</span>
+                    <span className="font-semibold text-xs">{nombreArchivo} listo</span>
+                    <span className="text-[10px] text-emerald-600 mt-1">Haz clic para cambiar de archivo</span>
                   </div>
                 ) : (
                   <div className="flex flex-col items-center text-slate-500">
                     <UploadCloud className="w-10 h-10 mb-2 text-[#008B45]" />
                     <span className="font-semibold text-xs">Selecciona o arrastra uno o varios archivos</span>
+                    <span className="text-[10px] text-slate-400 mt-1">Archivos PDF permitidos</span>
                   </div>
                 )}
-              </div>
+              </label>
 
               {/* Botón de Procesar */}
               <button 
@@ -224,10 +239,10 @@ export default function App() {
       </div>
     );
   }
-  // --- PASO 3: TABLA CONTABLE COMPARATIVA (EXTRACCIÓN) ---
+
+  // --- PASO 3: TABLA CONTABLE COMPARATIVA ---
   return (
     <div className="min-h-screen bg-slate-50 text-slate-800 flex flex-col font-sans">
-      {/* Header Corporativo */}
       <header className="bg-white border-b border-slate-200 px-6 py-3 flex items-center justify-between shadow-sm">
         <div className="flex items-center space-x-3">
           <button 
@@ -251,10 +266,7 @@ export default function App() {
         </div>
       </header>
 
-      {/* Contenido en Grilla */}
       <main className="flex-1 max-w-7xl w-full mx-auto p-6 grid grid-cols-12 gap-6">
-        
-        {/* Tabla Contable */}
         <section className="col-span-8 bg-white rounded-2xl border border-slate-200 p-5 shadow-sm flex flex-col justify-between">
           <div>
             <div className="flex justify-between items-center mb-4">
@@ -311,12 +323,11 @@ export default function App() {
           </div>
         </section>
 
-        {/* Panel Lateral */}
         <section className="col-span-4 flex flex-col space-y-6">
           <div className="bg-white rounded-2xl border-2 border-dashed border-slate-200 p-6 flex flex-col items-center justify-center text-center flex-1">
             <FileText className="w-10 h-10 text-[#008B45] mb-2" />
             <span className="text-xs font-bold text-slate-700">Documento cargado</span>
-            <span className="text-[11px] text-slate-400 mt-1">EEFF_2025_Davivienda.pdf</span>
+            <span className="text-[11px] text-slate-400 mt-1">{nombreArchivo || "Documento_Sin_Nombre.pdf"}</span>
           </div>
 
           <div className="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm">
@@ -335,7 +346,6 @@ export default function App() {
         </section>
       </main>
 
-      {/* Modal Advertencia */}
       {mostrarModal && (
         <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-2xl p-6 max-w-sm w-full shadow-2xl border border-slate-100 text-center">
