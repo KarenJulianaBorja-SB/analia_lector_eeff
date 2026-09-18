@@ -33,6 +33,7 @@ export default function App() {
   const [poliza, setPoliza] = useState("No");
   const [clasificacion, setClasificacion] = useState("Enfoque");
   const [nombreArchivo, setNombreArchivo] = useState("");
+  const [errorArchivo, setErrorArchivo] = useState(false);
 
   const [datos, setDatos] = useState(DATOS_INICIALES);
   const [mostrarModal, setMostrarModal] = useState(false);
@@ -43,7 +44,17 @@ export default function App() {
     const file = event.target.files[0];
     if (file) {
       setNombreArchivo(file.name);
+      setErrorArchivo(false);
     }
+  };
+
+  const procesarFormulario = () => {
+    if (!nombreArchivo) {
+      setErrorArchivo(true);
+      return;
+    }
+    setErrorArchivo(false);
+    setVista("tabla");
   };
 
   const handleCellChange = (id, year, value) => {
@@ -76,16 +87,23 @@ export default function App() {
 
   const formatCOP = (val) => new Intl.NumberFormat("es-CO", { style: "currency", currency: "COP", maximumFractionDigits: 0 }).format(val);
 
+  // --- PASO 1: MENÚ CON DEGRADADO CORPORATIVO VERDE Y AMARILLO BOLÍVAR ---
   if (vista === "inicio") {
     return (
-      <div className="min-h-screen bg-slate-950 flex items-center justify-center p-4 font-sans">
-        <div className="bg-white rounded-3xl p-8 max-w-md w-full text-center shadow-2xl border border-slate-200">
-          <div className="w-16 h-16 bg-[#008B45] text-white rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg shadow-emerald-900/30">
+      <div className="min-h-screen bg-gradient-to-br from-[#006834] via-[#008B45] to-[#fecb00] flex flex-col items-center justify-center p-4 font-sans relative overflow-hidden">
+        {/* Esferas de luz difuminadas para dar elegancia */}
+        <div className="absolute top-[-10%] left-[-10%] w-96 h-96 bg-amber-300/20 rounded-full blur-3xl pointer-events-none"></div>
+        <div className="absolute bottom-[-10%] right-[-10%] w-96 h-96 bg-emerald-900/30 rounded-full blur-3xl pointer-events-none"></div>
+
+        <div className="bg-white/95 backdrop-blur-md rounded-3xl p-8 max-w-md w-full text-center shadow-2xl border border-white/40 relative z-10">
+          <div className="w-16 h-16 bg-[#008B45] text-white rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg shadow-emerald-900/30 ring-4 ring-amber-400/50">
             <ShieldCheck className="w-10 h-10" />
           </div>
-          <span className="text-[11px] uppercase tracking-widest text-slate-400 font-bold block">
+
+          <span className="text-[11px] uppercase tracking-widest text-slate-500 font-bold block">
             SEGUROS BOLÍVAR
           </span>
+
           <h1 className="text-3xl font-black text-[#008B45] mt-1 tracking-tight">ANALIA</h1>
           <p className="text-xs text-slate-500 mt-2 mb-8 font-medium">
             Por favor seleccione el servicio que desea utilizar
@@ -97,7 +115,7 @@ export default function App() {
             </button>
             <button 
               onClick={() => setVista("formulario")}
-              className="p-3 rounded-2xl bg-[#008B45] hover:bg-[#007037] text-white text-xs font-bold transition transform hover:scale-105 shadow-md shadow-emerald-800/30 h-20 flex items-center justify-center leading-tight"
+              className="p-3 rounded-2xl bg-[#008B45] hover:bg-[#007037] text-white text-xs font-bold transition transform hover:scale-105 shadow-lg shadow-emerald-800/30 h-20 flex items-center justify-center leading-tight ring-2 ring-amber-400/60"
             >
               Lector de EEFF
             </button>
@@ -110,9 +128,10 @@ export default function App() {
     );
   }
 
+  // --- PASO 2: FORMULARIO INTERMEDIO ---
   if (vista === "formulario") {
     return (
-      <div className="min-h-screen bg-slate-100 flex flex-col font-sans">
+      <div className="min-h-screen bg-gradient-to-b from-amber-50/50 via-emerald-50/30 to-slate-100 flex flex-col font-sans">
         <header className="bg-white border-b border-slate-200 px-6 py-3 flex items-center justify-between shadow-sm">
           <div className="flex items-center space-x-3">
             <button 
@@ -137,7 +156,7 @@ export default function App() {
         </header>
 
         <main className="flex-1 flex items-center justify-center p-6">
-          <div className="bg-white rounded-3xl p-8 max-w-lg w-full shadow-xl border border-slate-200">
+          <div className="bg-white/95 backdrop-blur-sm rounded-3xl p-8 max-w-lg w-full shadow-xl border border-slate-200">
             <div className="text-center mb-6">
               <span className="text-[11px] uppercase tracking-widest text-slate-400 font-bold block">SEGUROS BOLÍVAR</span>
               <h2 className="text-2xl font-bold text-[#008B45] mt-1">Lector de Estados Financieros</h2>
@@ -194,25 +213,37 @@ export default function App() {
                 </select>
               </div>
 
-              <label className={`border-2 border-dashed rounded-2xl p-6 text-center cursor-pointer transition flex flex-col items-center justify-center ${nombreArchivo ? "border-emerald-500 bg-emerald-50/50" : "border-slate-300 hover:border-[#008B45] bg-slate-50"}`}>
-                <input type="file" accept=".pdf" onChange={handleFileSelect} className="hidden" />
-                {nombreArchivo ? (
-                  <div className="flex flex-col items-center text-emerald-700">
-                    <CheckCircle2 className="w-10 h-10 mb-2 text-[#008B45]" />
-                    <span className="font-semibold text-xs">{nombreArchivo} listo</span>
-                    <span className="text-[10px] text-emerald-600 mt-1">Haz clic para cambiar de archivo</span>
-                  </div>
-                ) : (
-                  <div className="flex flex-col items-center text-slate-500">
-                    <UploadCloud className="w-10 h-10 mb-2 text-[#008B45]" />
-                    <span className="font-semibold text-xs">Selecciona o arrastra uno o varios archivos</span>
-                    <span className="text-[10px] text-slate-400 mt-1">Archivos PDF permitidos</span>
+              {/* Area de archivo con aviso de obligatoriedad */}
+              <div>
+                <label className={`border-2 border-dashed rounded-2xl p-6 text-center cursor-pointer transition flex flex-col items-center justify-center ${
+                  errorArchivo ? "border-red-500 bg-red-50/50" : nombreArchivo ? "border-emerald-500 bg-emerald-50/50" : "border-slate-300 hover:border-[#008B45] bg-slate-50"
+                }`}>
+                  <input type="file" accept=".pdf,.docx,.xlsx" onChange={handleFileSelect} className="hidden" />
+                  {nombreArchivo ? (
+                    <div className="flex flex-col items-center text-emerald-700">
+                      <CheckCircle2 className="w-10 h-10 mb-2 text-[#008B45]" />
+                      <span className="font-semibold text-xs">{nombreArchivo} listo</span>
+                      <span className="text-[10px] text-emerald-600 mt-1">Haz clic para cambiar de archivo</span>
+                    </div>
+                  ) : (
+                    <div className="flex flex-col items-center text-slate-500">
+                      <UploadCloud className={`w-10 h-10 mb-2 ${errorArchivo ? "text-red-500" : "text-[#008B45]"}`} />
+                      <span className="font-semibold text-xs">Selecciona o arrastra uno o varios archivos</span>
+                      <span className="text-[10px] text-slate-400 mt-1">Formatos PDF, DOCX o Excel permitidos</span>
+                    </div>
+                  )}
+                </label>
+
+                {errorArchivo && (
+                  <div className="flex items-center space-x-1 text-red-600 text-[11px] font-medium mt-1.5 pl-1">
+                    <AlertTriangle className="w-3.5 h-3.5" />
+                    <span>Debes adjuntar un archivo (PDF/DOCX) para continuar.</span>
                   </div>
                 )}
-              </label>
+              </div>
 
               <button 
-                onClick={() => setVista("tabla")}
+                onClick={procesarFormulario}
                 className="w-full mt-4 py-3 bg-[#008B45] hover:bg-[#007037] text-white font-bold text-xs rounded-xl shadow-md transition transform hover:scale-[1.01]"
               >
                 Procesar Estado Financiero
@@ -224,6 +255,7 @@ export default function App() {
     );
   }
 
+  // --- PASO 3: TABLA Y PANEL DE CUPOS ---
   return (
     <div className="min-h-screen bg-slate-50 text-slate-800 flex flex-col font-sans">
       <header className="bg-white border-b border-slate-200 px-6 py-3 flex items-center justify-between shadow-sm">
@@ -311,12 +343,11 @@ export default function App() {
           </div>
         </section>
 
-        {/* Panel Lateral con los dos botones integrados */}
         <section className="col-span-4 flex flex-col space-y-6">
           <div className="bg-white rounded-2xl border-2 border-dashed border-slate-200 p-6 flex flex-col items-center justify-center text-center flex-1">
             <FileText className="w-10 h-10 text-[#008B45] mb-2" />
             <span className="text-xs font-bold text-slate-700">Documento cargado</span>
-            <span className="text-[11px] text-slate-400 mt-1">{nombreArchivo || "EEFF_2025_Davivienda.pdf"}</span>
+            <span className="text-[11px] text-slate-400 mt-1">{nombreArchivo || "Documento_Estados_Financieros.pdf"}</span>
           </div>
 
           <div className="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm">
